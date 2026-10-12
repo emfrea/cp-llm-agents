@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.idea/
+.vscode/
+.DS_Store
+
+# Agent run artifacts (generated models, verifiers, logs, summaries)
+runs/

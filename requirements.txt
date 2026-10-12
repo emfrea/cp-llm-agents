@@ -1,0 +1,11 @@
+# Core
+anthropic>=0.40
+
+# Verifier agent (pytest test suites are run as subprocesses)
+pytest>=8.0
+
+# Solver frameworks — install the ones you use:
+cpmpy>=0.9
+ortools>=9.8
+# gurobipy>=11.0      # requires a Gurobi licence
+# minizinc            # also needs the MiniZinc CLI on PATH (https://www.minizinc.org)
