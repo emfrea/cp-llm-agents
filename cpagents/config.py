@@ -19,6 +19,14 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 # Any current Claude model id works. Override with CP_AGENTS_MODEL.
 MODEL = os.environ.get("CP_AGENTS_MODEL", "claude-sonnet-4-5")
 
+# --- Backend -----------------------------------------------------------------
+# "sdk" -> Claude Agent SDK, authenticating with your Claude Pro/Max SUBSCRIPTION
+#          via the `claude` CLI (requires `pip install claude-agent-sdk`, the `claude`
+#          CLI logged in, and ANTHROPIC_API_KEY unset). This is what the thesis
+#          experiments used.
+# "api"  -> Anthropic SDK with ANTHROPIC_API_KEY (pay-as-you-go). Zero extra setup.
+BACKEND = os.environ.get("CP_AGENTS_BACKEND", "api")
+
 # --- Solver frameworks -------------------------------------------------------
 FRAMEWORKS = ["cpmpy", "or-tools", "gurobipy", "minizinc"]
 FRAMEWORK_EXT = {"cpmpy": "py", "or-tools": "py", "gurobipy": "py", "minizinc": "mzn"}

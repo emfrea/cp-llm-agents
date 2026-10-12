@@ -1,5 +1,6 @@
-# Core
-anthropic>=0.40
+# Backend (pick one; see README "Backends")
+anthropic>=0.40          # for CP_AGENTS_BACKEND=api  (pay-as-you-go, needs ANTHROPIC_API_KEY)
+claude-agent-sdk>=0.1    # for CP_AGENTS_BACKEND=sdk  (subscription; also needs the `claude` CLI logged in)
 
 # Verifier agent (pytest test suites are run as subprocesses)
 pytest>=8.0

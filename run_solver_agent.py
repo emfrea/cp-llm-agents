@@ -13,7 +13,7 @@ import argparse
 import json
 import sys
 
-from cpagents.config import RUNS_DIR, ANTHROPIC_API_KEY
+from cpagents.config import RUNS_DIR, ANTHROPIC_API_KEY, BACKEND
 from cpagents.dataset import load_problems
 from cpagents.agents import solve
 
@@ -25,8 +25,10 @@ def main():
     ap.add_argument("--framework", default="cpmpy", choices=["cpmpy", "or-tools", "gurobipy", "minizinc"])
     args = ap.parse_args()
 
-    if not ANTHROPIC_API_KEY:
-        print("ERROR: set ANTHROPIC_API_KEY.", file=sys.stderr); sys.exit(1)
+    if BACKEND == "api" and not ANTHROPIC_API_KEY:
+        print("ERROR: BACKEND=api requires ANTHROPIC_API_KEY. "
+              "(For the SDK/subscription backend set CP_AGENTS_BACKEND=sdk and log in with the `claude` CLI.)",
+              file=sys.stderr); sys.exit(1)
 
     problems = load_problems(args.problems)
     ids = [args.problem] if args.problem else list(problems)

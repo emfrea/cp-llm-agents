@@ -44,12 +44,33 @@ Key design points:
 ## Install
 
 ```bash
-pip install -r requirements.txt     # anthropic, pytest, cpmpy, ortools
-export ANTHROPIC_API_KEY=sk-ant-...
+pip install -r requirements.txt
 export CP_AGENTS_MODEL=claude-sonnet-4-5   # optional: any current Claude model id
 ```
 
 MiniZinc also needs the [MiniZinc CLI](https://www.minizinc.org) on `PATH`; Gurobi needs a licence.
+
+## Backends
+
+The agent loop runs through one of two backends, selected by `CP_AGENTS_BACKEND`:
+
+- **`sdk`** — the **Claude Agent SDK**, authenticating with a Claude Pro/Max **subscription**
+  via the `claude` CLI. **This is what the thesis experiments used.** Needs
+  `pip install claude-agent-sdk`, the `claude` CLI logged in (`claude /login` or
+  `claude setup-token`), and `ANTHROPIC_API_KEY` **unset** (it would force API billing).
+- **`api`** — the **Anthropic API** (pay-as-you-go). Needs only `anthropic` and
+  `ANTHROPIC_API_KEY`. This is the default (zero extra setup).
+
+```bash
+# subscription backend (as in the thesis)
+export CP_AGENTS_BACKEND=sdk      # and `claude /login`, and unset ANTHROPIC_API_KEY
+
+# API backend (default)
+export CP_AGENTS_BACKEND=api
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Both drive the exact same executors and prompts; only the transport/billing differs.
 
 ## Run
 
@@ -111,7 +132,9 @@ cpagents/
   tools.py       tool schemas + the three ToolExecutors
   execution.py   run_solver / run_verifier (subprocess, timeouts)
   malformed.py   robustness inputs for the verifier
-  backend.py     the Anthropic tool-calling loop
+  backend.py     dispatcher (sdk | api)
+  backend_sdk.py Claude Agent SDK loop (subscription)
+  backend_api.py Anthropic API loop (pay-as-you-go)
   agents.py      solve / build_verifier / solve_with_judge
 run_solver_agent.py · run_verifier_agent.py · run_solver_with_judge.py
 examples/problems.jsonl

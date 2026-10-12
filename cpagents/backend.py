@@ -1,51 +1,20 @@
-"""Minimal Anthropic tool-calling loop.
+"""Backend dispatcher.
 
-Drives any of the executors to completion. Requires `pip install anthropic` and the
-ANTHROPIC_API_KEY environment variable.
+Runs the agent loop through either the Claude Agent SDK (subscription — what the thesis
+experiments used) or the Anthropic API (pay-as-you-go), selected by config.BACKEND
+(env CP_AGENTS_BACKEND, "sdk" or "api"). Returns the executor's summary record.
 """
 
-import anthropic
-
-from .config import MODEL, MAX_TOKENS, AGENT_MAX_TURNS, ANTHROPIC_API_KEY
+from .config import BACKEND
 
 
 def run_agent(executor, system_prompt, user_prompt):
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    messages = [{"role": "user", "content": user_prompt}]
-
-    for _turn in range(AGENT_MAX_TURNS):
-        resp = client.messages.create(
-            model=MODEL,
-            max_tokens=MAX_TOKENS,
-            system=system_prompt,
-            tools=executor.tool_schemas,
-            messages=messages,
-        )
-        messages.append({"role": "assistant", "content": resp.content})
-
-        tool_results = []
-        for block in resp.content:
-            if block.type == "text":
-                executor.log_assistant(block.text)
-            elif block.type == "tool_use":
-                result = executor.dispatch(block.name, block.input)
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": str(result),
-                })
-
-        if resp.stop_reason != "tool_use":
-            # Model stopped without a tool call. If it isn't actually done, nudge once.
-            if not executor.finished:
-                messages.append({"role": "user",
-                                 "content": "Continue using the tools. Call done()/"
-                                            "mark_verification_ready() when finished."})
-                continue
-            break
-
-        messages.append({"role": "user", "content": tool_results})
-        if executor.finished:
-            break
-
+    if BACKEND == "sdk":
+        from .backend_sdk import run_agent_sdk
+        run_agent_sdk(executor, system_prompt, user_prompt)
+    elif BACKEND == "api":
+        from .backend_api import run_agent_api
+        run_agent_api(executor, system_prompt, user_prompt)
+    else:
+        raise ValueError(f"Unknown CP_AGENTS_BACKEND={BACKEND!r} (use 'sdk' or 'api').")
     return executor.summary_record()
